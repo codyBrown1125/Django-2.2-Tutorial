@@ -1,3 +1,5 @@
 Django 2.2 Tutorial
 
-First change on dev branch
+Now works on python3.
+
+*Note* Please remember to use `python3` in place of the tutorials `python` calls.

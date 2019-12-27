@@ -1,0 +1,8 @@
+# comments go like this
+
+# specifically django 2.2
+django = "==2.2.7"
+
+# dev
+# nonspecific
+pylint

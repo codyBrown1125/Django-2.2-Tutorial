@@ -1,0 +1,81 @@
+Django notes
+
+1. Maintain loose coupling
+	- this can be seen in views, they need to pass the correct information, but
+		also need to maintain coupling.. so in other words, pass the info with
+		very little nit-picks. See the quote here:
+		
+
+		Philosophy
+
+		Why do we use a helper function get_object_or_404() instead of automatically
+		catching the ObjectDoesNotExist exceptions at a higher level, or having the model API raise
+		Http404 instead of ObjectDoesNotExist?
+		
+		Because that would couple the model layer to the view layer. One of the foremost design
+		goals of Django is to maintain loose coupling. Some controlled coupling is introduced 
+		in the django.shortcuts module.
+
+
+2. Generall Server-side notes
+	We set the form’s action to {% url 'polls:vote' question.id %}, and we set method="post". 
+	Using method="post" (as opposed to method="get") is very important, because the act of submitting 
+	this form will alter data server-side. Whenever you create a form that alters data server-side, 
+	use method="post". This tip isn’t specific to Django; it’s just good Web development practice.
+
+
+
+	from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+
+from .models import Choice, Question
+# ...
+def vote(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        return render(request, 'polls/detail.html', {
+            'question': question,
+            'error_message': "You didn't select a choice.",
+        })
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+3. Generic hidden methods
+    - a lot of different members have hidden methods... it's confusing
+            - ex: pub_date__lte=timezone.now()
+                automatically brings up an evaluation for less than equal to without defining it.
+
+
+
+4. Testing and going CI/CD
+
+See extract from django tutorial https://docs.djangoproject.com/en/2.2/intro/tutorial05/
+    Further testing¶
+    This tutorial only introduces some of the basics of testing. There’s a great deal more you can do, and a number of very useful tools at your disposal to achieve some very clever things.
+
+    For example, while our tests here have covered some of the internal logic of a model and the way our views publish information, you can use an “in-browser” framework such as Selenium to test the way your HTML actually renders in a browser. These tools allow you to check not just the behavior of your Django code, but also, for example, of your JavaScript. It’s quite something to see the tests launch a browser, and start interacting with your site, as if a human being were driving it! Django includes LiveServerTestCase to facilitate integration with tools like Selenium.
+
+    If you have a complex application, you may want to run tests automatically with every commit for the purposes of continuous integration, so that quality control is itself - at least partially - automated.
+
+    A good way to spot untested parts of your application is to check code coverage. This also helps identify fragile or even dead code. If you can’t test a piece of code, it usually means that code should be refactored or removed. Coverage will help to identify dead code. See Integration with coverage.py for details.
+
+    Testing in Django has comprehensive information about testing.
+
+
+
+5. Filtering and Searching
+
+    See tutorial 7 - https://docs.djangoproject.com/en/2.2/intro/tutorial07/
+
+6. Reusable apps tutorial
+    https://docs.djangoproject.com/en/2.2/intro/reusable-apps/
